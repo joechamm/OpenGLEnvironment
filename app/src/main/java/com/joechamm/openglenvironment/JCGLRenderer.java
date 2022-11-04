@@ -2,28 +2,63 @@ package com.joechamm.openglenvironment;
 
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.util.Log;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 public class JCGLRenderer implements GLSurfaceView.Renderer {
 
-    private final String TAG = "jcglenv:renderer";
+    private static final String TAG = "jcglenv:renderer";
+
+    private Triangle mTriangle;
+    private Square mSquare;
 
     @Override
     public void onSurfaceCreated ( GL10 gl, EGLConfig config ) {
+        // DEBUGGING
+        Log.d ( TAG, "onSurfaceCreate called" );
+
         // Set the background frame color
         GLES20.glClearColor ( 0.0f, 0.0f, 0.0f, 1.0f );
+
+        // initialize triangle
+        mTriangle = new Triangle ();
+
+        // initialize square
+        mSquare = new Square ();
     }
 
     @Override
     public void onSurfaceChanged ( GL10 gl, int width, int height ) {
+        // DEBUGGING
+        Log.d ( TAG, "onSurfaceChanged called" );
         GLES20.glViewport ( 0, 0, width, height );
     }
 
     @Override
     public void onDrawFrame ( GL10 gl ) {
+        // TODO: frame rate counter
         // Redraw background color
         GLES20.glClear ( GLES20.GL_COLOR_BUFFER_BIT );
+
+        mTriangle.draw ();
+
+        // mSquare.draw();
+    }
+
+    public static int loadShader ( int type, String shaderCode ) {
+        // DEBUGGING
+        Log.d ( TAG, "loadShader called" );
+
+        // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
+        // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
+        int shader = GLES20.glCreateShader ( type );
+
+        // add the source code to the shader and compile it
+        GLES20.glShaderSource ( shader, shaderCode );
+        GLES20.glCompileShader ( shader );
+
+        return shader;
     }
 }

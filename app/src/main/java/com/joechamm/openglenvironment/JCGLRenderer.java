@@ -3,6 +3,7 @@ package com.joechamm.openglenvironment;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.os.SystemClock;
 import android.util.Log;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -19,6 +20,7 @@ public class JCGLRenderer implements GLSurfaceView.Renderer {
     private final float[] vPMatrix = new float[ 16 ];
     private final float[] projctionMatrix = new float[ 16 ];
     private final float[] viewMatrix = new float[ 16 ];
+    private final float[] rotationMatrix = new float[ 16 ];
 
     @Override
     public void onSurfaceCreated ( GL10 gl, EGLConfig config ) {
@@ -53,13 +55,25 @@ public class JCGLRenderer implements GLSurfaceView.Renderer {
         // Redraw background color
         GLES20.glClear ( GLES20.GL_COLOR_BUFFER_BIT );
 
+        float[] scratch = new float[ 16 ];
+
         // Set the camera position (View matrix)
         Matrix.setLookAtM ( viewMatrix, 0, 0, 0, 3, 0f, 0f, 0f, 0f, 1.0f, 0.0f );
 
         // Calculate the projection and view transformation
         Matrix.multiplyMM ( vPMatrix, 0, projctionMatrix, 0, viewMatrix, 0 );
 
-        mTriangle.draw ( vPMatrix );
+        // create a rotation transformation for the triangle
+        long time = SystemClock.uptimeMillis () % 4000L;
+        float angle = 0.090f * ( (int) time );
+        Matrix.setRotateM ( rotationMatrix, 0, angle, 0, 0, - 1.0f );
+
+        // Combine the rotation matrix with the projection and camera view
+        // Note that the vPMatrix factor *must be first* in order for the matrix multiplciation product to be correct.
+        Matrix.multiplyMM ( scratch, 0, vPMatrix, 0, rotationMatrix, 0 );
+
+        // Draw the triangle
+        mTriangle.draw ( scratch );
 
         // mSquare.draw();
     }

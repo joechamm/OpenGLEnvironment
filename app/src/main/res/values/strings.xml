@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">OpenGLEnvironment</string>
+    <string name="debug_activity">jcglenv:activity</string>
+    <string name="debug_surface_view">jcglenv:surfaceview</string>
+    <string name="debug_renderer">jcglenv:renderer</string>
+</resources>

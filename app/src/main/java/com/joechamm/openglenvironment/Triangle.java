@@ -27,9 +27,15 @@ public class Triangle {
 
     // SHADER PROGRAM MEMBERS
     private final String vsCode =
-            "attribute vec4 vPosition;" +
+            // This matrix member variable provides a hook to manipulate
+            // the coordinates of the objects that use this vertex shader
+            "uniform mat4 uMVPMatrix;" +
+                    "attribute vec4 vPosition;" +
+                    // the matrix must be included as a modifier of gl_Position
+                    // Note that the uMVPMatrix factor *must be first* in order
+                    // for the matrix multiplication product to be correct.
                     "void main() {" +
-                    "   gl_Position = vPosition;" +
+                    "   gl_Position = uMVPMatrix * vPosition;" +
                     "}";
 
     private final String fsCode =
@@ -41,11 +47,12 @@ public class Triangle {
 
     private final int mProgram;
 
-    private int mPositionHandle;
-    private int mColorHandle;
+    private int positionHandle;
+    private int colorHandle;
+    private int vPMatrixHandle; // used to access and set the view transformation
 
-    private final int mVertexCount = triangleCoords.length / COORDS_PER_VERTEX;
-    private final int mVertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
+    private final int vertexCount = triangleCoords.length / COORDS_PER_VERTEX;
+    private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
     public Triangle () {
         // DEBUGGING
@@ -82,31 +89,37 @@ public class Triangle {
 
     }
 
-    public void draw () {
+    public void draw ( float[] mvpMatrix ) {
         // Add program to OpenGL ES environment
         GLES20.glUseProgram ( mProgram );
 
         // get handle to vertex shader's vPosition member
-        mPositionHandle = GLES20.glGetAttribLocation ( mProgram, "vPosition" );
+        positionHandle = GLES20.glGetAttribLocation ( mProgram, "vPosition" );
 
         // Enable a handle to the triangle vertices
-        GLES20.glEnableVertexAttribArray ( mPositionHandle );
+        GLES20.glEnableVertexAttribArray ( positionHandle );
 
         // Prepare the triangle coordinate data
-        GLES20.glVertexAttribPointer ( mPositionHandle, COORDS_PER_VERTEX,
+        GLES20.glVertexAttribPointer ( positionHandle, COORDS_PER_VERTEX,
                                        GLES20.GL_FLOAT, false,
-                                       mVertexStride, mVertexBuffer );
+                                       vertexStride, mVertexBuffer );
 
         // get handle to fragment shader's vColor member
-        mColorHandle = GLES20.glGetUniformLocation ( mProgram, "vColor" );
+        colorHandle = GLES20.glGetUniformLocation ( mProgram, "vColor" );
 
         // set color for drawing the triangle
-        GLES20.glUniform4fv ( mColorHandle, 1, color, 0 );
+        GLES20.glUniform4fv ( colorHandle, 1, color, 0 );
+
+        // get handle to shape's transformation matrix
+        vPMatrixHandle = GLES20.glGetUniformLocation ( mProgram, "uMVPMatrix" );
+
+        // Pass the projection and view transformation to the shader
+        GLES20.glUniformMatrix4fv ( vPMatrixHandle, 1, false, mvpMatrix, 0 );
 
         // Draw the triangle
-        GLES20.glDrawArrays ( GLES20.GL_TRIANGLES, 0, mVertexCount );
+        GLES20.glDrawArrays ( GLES20.GL_TRIANGLES, 0, vertexCount );
 
         // Disable vertex array
-        GLES20.glDisableVertexAttribArray ( mPositionHandle );
+        GLES20.glDisableVertexAttribArray ( positionHandle );
     }
 }

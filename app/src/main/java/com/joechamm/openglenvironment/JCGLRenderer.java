@@ -22,6 +22,9 @@ public class JCGLRenderer implements GLSurfaceView.Renderer {
     private final float[] viewMatrix = new float[ 16 ];
     private final float[] rotationMatrix = new float[ 16 ];
 
+    // rotation angle
+    public volatile float mAngle;
+
     @Override
     public void onSurfaceCreated ( GL10 gl, EGLConfig config ) {
         // DEBUGGING
@@ -64,9 +67,9 @@ public class JCGLRenderer implements GLSurfaceView.Renderer {
         Matrix.multiplyMM ( vPMatrix, 0, projctionMatrix, 0, viewMatrix, 0 );
 
         // create a rotation transformation for the triangle
-        long time = SystemClock.uptimeMillis () % 4000L;
-        float angle = 0.090f * ( (int) time );
-        Matrix.setRotateM ( rotationMatrix, 0, angle, 0, 0, - 1.0f );
+        //long time = SystemClock.uptimeMillis () % 4000L;
+        //float angle = 0.090f * ( (int) time );
+        Matrix.setRotateM ( rotationMatrix, 0, mAngle, 0, 0, - 1.0f );
 
         // Combine the rotation matrix with the projection and camera view
         // Note that the vPMatrix factor *must be first* in order for the matrix multiplciation product to be correct.
@@ -76,6 +79,14 @@ public class JCGLRenderer implements GLSurfaceView.Renderer {
         mTriangle.draw ( scratch );
 
         // mSquare.draw();
+    }
+
+    public float getAngle () {
+        return mAngle;
+    }
+
+    public void setAngle ( float angle ) {
+        mAngle = angle;
     }
 
     public static int loadShader ( int type, String shaderCode ) {

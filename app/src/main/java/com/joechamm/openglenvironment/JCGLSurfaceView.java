@@ -31,6 +31,7 @@ public class JCGLSurfaceView extends GLSurfaceView {
         float x = event.getX ();
         float y = event.getY ();
 
+        //noinspection SwitchStatementWithTooFewBranches
         switch ( event.getAction () ) {
             case MotionEvent.ACTION_MOVE:
                 float dx = x - previousX;

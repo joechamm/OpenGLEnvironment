@@ -5,9 +5,9 @@ import android.opengl.GLES20;
 
 class TriangleShader extends ShaderProgram {
 
-    private int aLoc_vPosition;
-    private int uLoc_vColor;
-    private int uLoc_uMVP;
+    private final int aLoc_vPosition;
+    private final int uLoc_vColor;
+    private final int uLoc_uMVP;
 
     TriangleShader ( Context context ) {
         super ( context, R.raw.triangle_vert, R.raw.triangle_frag );

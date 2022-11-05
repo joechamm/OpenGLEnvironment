@@ -13,6 +13,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
 
+@SuppressWarnings("SpellCheckingInspection")
 public class ShaderHelper {
 
     private static final String TAG = "jcglenv:shaderhelper";

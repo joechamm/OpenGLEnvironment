@@ -18,20 +18,14 @@ public class Triangle {
 
     // number of coordinates per vertex in this array
     static final int COORDS_PER_VERTEX = 3;
-    static float triangleCoords[] = { // in counterclockwise order:
+    static float[] triangleCoords = { // in counterclockwise order:
             0.0f, 0.622008459f, 0.0f, // top
             - 0.5f, - 0.311004243f, 0.0f, // bottom left
             0.5f, - 0.311004243f, 0.0f  // bottom right
     };
 
     // set color with red, green, blue and alpha (opacity) values
-    float color[] = { 0.63671875f, 0.76953125f, 0.22265625f, 1.0f };
-/*
-    private final int mProgram;
-
-    private int aLoc_vPosition;
-    private int uLoc_vColor;
-    private int uLoc_uMVP; // used to access and set the view transformation*/
+    float[] color = { 0.63671875f, 0.76953125f, 0.22265625f, 1.0f };
 
     private final TriangleShader mShader;
 
@@ -59,17 +53,6 @@ public class Triangle {
 
         mShader = new TriangleShader ( context );
 
-/*        String vertexShaderSource = ShaderHelper.loadStringResource ( context, R.raw.triangle_vert );
-        String fragmentShaderSource = ShaderHelper.loadStringResource ( context, R.raw.triangle_frag );
-
-        final int vertShader = ShaderHelper.compileVertexShader ( vertexShaderSource );
-        final int fragShader = ShaderHelper.compileFragmentShader ( fragmentShaderSource );
-
-        mProgram = ShaderHelper.createAndLinkProgram ( vertShader, fragShader, null );
-
-        aLoc_vPosition = ShaderHelper.getAttributeLocation ( mProgram, "vPosition" );
-        uLoc_vColor = ShaderHelper.getUniformLocation ( mProgram, "vColor" );
-        uLoc_uMVP = ShaderHelper.getUniformLocation ( mProgram, "uMVP" );*/
     }
 
     public void draw ( float[] mvpMatrix ) {
@@ -82,9 +65,6 @@ public class Triangle {
 
         GLES20.glEnableVertexAttribArray ( mShader.getaLoc_vPosition () );
         // Prepare the triangle coordinate data
-        //      GLES20.glVertexAttribPointer ( aLoc_vPosition, COORDS_PER_VERTEX,
-        //                                     GLES20.GL_FLOAT, false,
-        //                                     vertexStride, mVertexBuffer );
 
         GLES20.glVertexAttribPointer ( mShader.getaLoc_vPosition (), COORDS_PER_VERTEX,
                                        GLES20.GL_FLOAT, false,

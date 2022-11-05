@@ -15,7 +15,7 @@ public class JCGLRenderer implements GLSurfaceView.Renderer {
     private static final String TAG = "jcglenv:renderer";
 
     // reference to current context
-    private Context mContext;
+    private final Context mContext;
 
     private Triangle mTriangle;
     private Square mSquare;
@@ -75,8 +75,6 @@ public class JCGLRenderer implements GLSurfaceView.Renderer {
         Matrix.multiplyMM ( vPMatrix, 0, projctionMatrix, 0, viewMatrix, 0 );
 
         // create a rotation transformation for the triangle
-        //long time = SystemClock.uptimeMillis () % 4000L;
-        //float angle = 0.090f * ( (int) time );
         Matrix.setRotateM ( rotationMatrix, 0, mAngle, 0, 0, - 1.0f );
 
         // Combine the rotation matrix with the projection and camera view

@@ -1,5 +1,6 @@
 package com.joechamm.openglenvironment;
 
+import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
@@ -13,6 +14,9 @@ public class JCGLRenderer implements GLSurfaceView.Renderer {
 
     private static final String TAG = "jcglenv:renderer";
 
+    // reference to current context
+    private Context mContext;
+
     private Triangle mTriangle;
     private Square mSquare;
 
@@ -25,6 +29,10 @@ public class JCGLRenderer implements GLSurfaceView.Renderer {
     // rotation angle
     public volatile float mAngle;
 
+    JCGLRenderer ( Context context ) {
+        mContext = context;
+    }
+
     @Override
     public void onSurfaceCreated ( GL10 gl, EGLConfig config ) {
         // DEBUGGING
@@ -34,7 +42,7 @@ public class JCGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glClearColor ( 0.0f, 0.0f, 0.0f, 1.0f );
 
         // initialize triangle
-        mTriangle = new Triangle ();
+        mTriangle = new Triangle ( mContext );
 
         // initialize square
         mSquare = new Square ();

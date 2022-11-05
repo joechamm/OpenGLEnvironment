@@ -7,9 +7,12 @@ import android.view.MotionEvent;
 
 public class JCGLSurfaceView extends GLSurfaceView {
 
+    private final String TAG = "jcglenv:surfaceview";
+
     private final JCGLRenderer mRenderer;
 
-    private final String TAG = "jcglenv:surfaceview";
+    // reference to our context
+    private Context mContext;
 
     // TODO: handle multiple context versions
     private final int EGL_CTX_VERSION_MAJ = 2;
@@ -56,13 +59,15 @@ public class JCGLSurfaceView extends GLSurfaceView {
     public JCGLSurfaceView ( Context context ) {
         super ( context );
 
+        mContext = context;
+
         // DEBUGGING
         Log.d ( TAG, "JCGLSurfaceView ctor called" );
 
         // Create an OpenGL ES context
         setEGLContextClientVersion ( EGL_CTX_VERSION_MAJ );
 
-        mRenderer = new JCGLRenderer ();
+        mRenderer = new JCGLRenderer ( context );
 
         // Set the renderer for drawing on the GLSurfaceView
         setRenderer ( mRenderer );

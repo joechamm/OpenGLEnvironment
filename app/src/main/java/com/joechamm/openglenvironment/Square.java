@@ -6,13 +6,15 @@ import android.util.Log;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.ShortBuffer;
+import java.nio.IntBuffer;
 
 public class Square {
     private static final String TAG = "jcglenv:square";
 
     private final PosColVertexClientBuffer mVertexBuffer;
-    private final ShortBuffer mIndexBuffer;
+    //   private final ShortBuffer mIndexBuffer;
+
+    private final int[] mIBO = new int[ 1 ];
 
     static final float[] squareVertices = {  // vertices tightly packed as {x,y,z,r,g,b,a}
             // top left
@@ -25,7 +27,7 @@ public class Square {
             0.5f, 0.5f, 0.0f, 0.87f, 0.02f, 0.08f, 0.85f
     };
 
-    private short[] indices = {
+    private final int[] indices = {
             0, 1, 2, // top left, bottom left, bottom right
             0, 2, 3  // top left, bottom right, top right
     };
@@ -44,14 +46,33 @@ public class Square {
         JCGLDebugger.checkGLError ( "after vertex buffer creation, before index buffer creation" );
 
         // initialize byte buffer for the draw list
-        ByteBuffer ib = ByteBuffer.allocateDirect (
-                // (# of coordinate values * 2 bytes per short)
-                indices.length * Constants.BYTES_PER_SHORT );
-        ib.order ( ByteOrder.nativeOrder () );
+//        ByteBuffer ib = ByteBuffer.allocateDirect (
+//                // (# of coordinate values * 2 bytes per short)
+//                indices.length * Constants.BYTES_PER_SHORT );
+//        ib.order ( ByteOrder.nativeOrder () );
+//
+//        mIndexBuffer = ib.asShortBuffer ();
+//        mIndexBuffer.put ( indices );
+//        mIndexBuffer.position ( 0 );
 
-        mIndexBuffer = ib.asShortBuffer ();
-        mIndexBuffer.put ( indices );
-        mIndexBuffer.position ( 0 );
+        final IntBuffer squareIndexBuffer = ByteBuffer.allocateDirect ( indices.length * Constants.BYTES_PER_INT )
+                                                      .order ( ByteOrder.nativeOrder () )
+                                                      .asIntBuffer ();
+
+        squareIndexBuffer.put ( indices ).position ( 0 );
+
+        GLES20.glGenBuffers ( 1, mIBO, 0 );
+        if ( mIBO[ 0 ] > 0 ) {
+            JCGLDebugger.checkGLError ( "after glGenBuffers(1,mIBO,0), before glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, mIBO[0]" );
+            GLES20.glBindBuffer ( GLES20.GL_ELEMENT_ARRAY_BUFFER, mIBO[ 0 ] );
+            JCGLDebugger.checkGLError ( "after glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, mIBO[0], before glBufferData" );
+            GLES20.glBufferData ( GLES20.GL_ELEMENT_ARRAY_BUFFER, squareIndexBuffer.capacity () * Constants.BYTES_PER_INT,
+                                  squareIndexBuffer, GLES20.GL_STATIC_DRAW );
+            JCGLDebugger.checkGLError ( "after glBufferData, before glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)" );
+            GLES20.glBindBuffer ( GLES20.GL_ELEMENT_ARRAY_BUFFER, 0 );
+        } else {
+            JCGLDebugger.checkGLError ( "after index buffer glGenBuffers" );
+        }
 
         JCGLDebugger.checkGLError ( "after index buffer creation" );
 
@@ -61,35 +82,60 @@ public class Square {
         // Add program to OpenGL ES environment
         //    GLES20.glUseProgram ( mProgram );
         // bind shader program
+        JCGLDebugger.checkGLError ( "Square:draw before mShader.useProgram" );
+
         mShader.useProgram ();
 
+        JCGLDebugger.checkGLError ( "Square:draw after mShader.useProgram, before glUniformMatrix4fv" );
         int posLoc = mShader.getaLoc_position ();
         int colLoc = mShader.getaLoc_color ();
         int mvpLoc = mShader.getuLoc_uMVP ();
 
-        int vertexByteStride = ( Constants.POSITION_ELEMENT_COUNT + Constants.COLOR_ELEMENT_COUNT ) * Constants.BYTES_PER_FLOAT;
-        int posByteOffset = 0;
-        int colByteOffset = Constants.POSITION_ELEMENT_COUNT * Constants.BYTES_PER_FLOAT;
-        int vertexCount = 4;
+        final int vertexByteStride = ( Constants.POSITION_ELEMENT_COUNT + Constants.COLOR_ELEMENT_COUNT ) * Constants.BYTES_PER_FLOAT;
+        final int posByteOffset = 0;
+        final int colByteOffset = Constants.POSITION_ELEMENT_COUNT * Constants.BYTES_PER_FLOAT;
+
+        final int COUNT = indices.length;
         // set uniforms
 
         GLES20.glUniformMatrix4fv ( mvpLoc, 1, false, mvpMatrix, 0 );
 
+        JCGLDebugger.checkGLError ( "Square:draw afer glUniformMatrix4fv, before glEnableVertexAttribArray" );
         GLES20.glEnableVertexAttribArray ( posLoc );
+        JCGLDebugger.checkGLError ( "Square:draw afer glEnableVertexAttribArray(posLoc), before glVertexAttribPointer" );
         GLES20.glVertexAttribPointer ( posLoc, Constants.POSITION_ELEMENT_COUNT, GLES20.GL_FLOAT, false, vertexByteStride,
                                        mVertexBuffer.getFloatBuffer ().position ( posByteOffset ) );
 
+        JCGLDebugger.checkGLError ( "Square:draw afer glVertexAttribPointer, before glEnableVertexAttribArray(colLoc)" );
         GLES20.glEnableVertexAttribArray ( colLoc );
+        JCGLDebugger.checkGLError ( "Square:draw afer glEnableVertexAttribArray(colLoc), before glVertexAttribPointer" );
         GLES20.glVertexAttribPointer ( colLoc, Constants.COLOR_ELEMENT_COUNT, GLES20.GL_FLOAT, false, vertexByteStride,
                                        mVertexBuffer.getFloatBuffer ().position ( colByteOffset ) );
 
+        JCGLDebugger.checkGLError ( "Square:draw afer glVertexAttribPointer, before glBindBuffer" );
         // make call to draw
-        GLES20.glDrawElements ( GLES20.GL_TRIANGLES, vertexCount, GLES20.GL_SHORT, mIndexBuffer );
+        //    GLES20.glDrawElements ( GLES20.GL_TRIANGLES, vertexCount, GLES20.GL_SHORT, mIndexBuffer );
+        //    GLES20.glDrawElements ( GLES20.GL_TRIANGLES, vertexCount, GLES20.GL_SHORT, ( (Buffer) mIndexBuffer ) );
 
+        GLES20.glBindBuffer ( GLES20.GL_ELEMENT_ARRAY_BUFFER, mIBO[ 0 ] );
+
+        JCGLDebugger.checkGLError ( "Square:draw afer glBindBuffer, before glDrawElements" );
+
+        GLES20.glDrawElements ( GLES20.GL_TRIANGLES, COUNT, GLES20.GL_INT, 0 );
+
+        JCGLDebugger.checkGLError ( "Square:draw afer glDrawElements, before glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)" );
+
+        GLES20.glBindBuffer ( GLES20.GL_ELEMENT_ARRAY_BUFFER, 0 );
+
+        JCGLDebugger.checkGLError (
+                "Square:draw afer glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0), before glDisableVertexAttribArray(posLoc)" );
         // reset state
         GLES20.glDisableVertexAttribArray ( posLoc );
+        JCGLDebugger.checkGLError ( "Square:draw afer glDisableVertexAttribArray(posLoc), before glDisableVertexAttribArray(colLoc)" );
         GLES20.glDisableVertexAttribArray ( colLoc );
+        JCGLDebugger.checkGLError ( "Square:draw afer glDisableVertexAttribArray(colLoc), before glUseProgram(0)" );
         GLES20.glUseProgram ( 0 );
+        JCGLDebugger.checkGLError ( "Square:draw afer glUseProgram(0)" );
     }
 }
 /*

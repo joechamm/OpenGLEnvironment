@@ -6,12 +6,9 @@ import android.opengl.GLES20;
 import android.util.Log;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.InputMismatchException;
 
 @SuppressWarnings("SpellCheckingInspection")
 public class ShaderHelper {
@@ -154,4 +151,20 @@ public class ShaderHelper {
         return GLES20.glGetAttribLocation ( program, attributeName );
     }
 
+    public static boolean validateShaderProgram ( final int program ) {
+        GLES20.glValidateProgram ( program );
+        final int[] validated = new int[ 1 ];
+        GLES20.glGetProgramiv ( program, GLES20.GL_VALIDATE_STATUS, validated, 0 );
+        String infoLog = GLES20.glGetProgramInfoLog ( program );
+        String validationStatus;
+        if ( validated[ 0 ] == GLES20.GL_TRUE ) {
+            validationStatus = "GL_TRUE";
+        } else {
+            validationStatus = "GL_FALSE";
+        }
+
+        Log.d ( TAG, "Shader Program Validation Status: " + validationStatus );
+        Log.d ( TAG, "Shader Program Info Log:\n" + infoLog );
+        return validated[ 0 ] != 0;
+    }
 }

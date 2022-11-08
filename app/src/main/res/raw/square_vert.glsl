@@ -1,7 +1,13 @@
 #version 100
-uniform mat4 uMVPMatrix;
-attribute vec4 vPosition;
+
+uniform mat4 uMVP;
+
+attribute vec3 a_position;
+attribute vec4 a_color;
+
+varying vec4 v_color;
 
 void main() {
-    gl_Position = uMVPMatrix * vPosition;
+    v_color = a_color;
+    gl_Position = uMVP * vec4(a_position, 1.0);
 }

@@ -14,7 +14,7 @@ public class JCGLRenderer implements GLSurfaceView.Renderer {
 
     private static final String TAG = "jcglenv:renderer";
 
-    // reference to current context
+    // reference to current context (activity)
     private final Context mContext;
 
     private Triangle mTriangle;
@@ -38,14 +38,23 @@ public class JCGLRenderer implements GLSurfaceView.Renderer {
         // DEBUGGING
         Log.d ( TAG, "onSurfaceCreate called" );
 
+        JCGLContextHelper.logGLVersion ( gl );
+        JCGLContextHelper.logGLVendor ( gl );
+        JCGLContextHelper.logGLRenderer ( gl );
+        JCGLContextHelper.logGLExtensions ( gl );
+
         // Set the background frame color
         GLES20.glClearColor ( 0.0f, 0.0f, 0.0f, 1.0f );
+
+        // Enable depth testing
+        GLES20.glEnable ( GLES20.GL_DEPTH_TEST );
+
 
         // initialize triangle
         mTriangle = new Triangle ( mContext );
 
         // initialize square
-        mSquare = new Square ();
+        mSquare = new Square ( mContext );
     }
 
     @Override
@@ -58,33 +67,58 @@ public class JCGLRenderer implements GLSurfaceView.Renderer {
 
         // this projection matrix is applied to object coordinates in the onDrawFrame() method
         Matrix.frustumM ( projctionMatrix, 0, - ratio, ratio, - 1, 1, 3, 7 );
+
+        // DEBUGGING
+        JCGLDebugger.checkGLError ( "glViewport" );
     }
 
     @Override
     public void onDrawFrame ( GL10 gl ) {
         // TODO: frame rate counter
         // Redraw background color
-        GLES20.glClear ( GLES20.GL_COLOR_BUFFER_BIT );
+        JCGLDebugger.checkGLError ( "onDrawFrame: before glClear" );
+
+        GLES20.glClear ( GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT );
+
+        JCGLDebugger.checkGLError ( "onDrawFrame: after glClear, before mSquare.draw" );
 
         float[] scratch = new float[ 16 ];
+
+        // Draw the square background first
 
         // Set the camera position (View matrix)
         Matrix.setLookAtM ( viewMatrix, 0, 0, 0, 3, 0f, 0f, 0f, 0f, 1.0f, 0.0f );
 
-        // Calculate the projection and view transformation
+        // Calculate the projection and view transformations
         Matrix.multiplyMM ( vPMatrix, 0, projctionMatrix, 0, viewMatrix, 0 );
 
-        // create a rotation transformation for the triangle
+        // create a rotation transformation for the square
         Matrix.setRotateM ( rotationMatrix, 0, mAngle, 0, 0, - 1.0f );
 
         // Combine the rotation matrix with the projection and camera view
         // Note that the vPMatrix factor *must be first* in order for the matrix multiplciation product to be correct.
         Matrix.multiplyMM ( scratch, 0, vPMatrix, 0, rotationMatrix, 0 );
+        mSquare.draw ( scratch );
 
-        // Draw the triangle
+        JCGLDebugger.checkGLError ( "onDrawFrame: after mSquare.draw, before mTriangle.draw" );
+
+        // Now draw the triangle on top
+        // rotate the triangle at a constant rate
+        long time = SystemClock.uptimeMillis () % 4000L;
+        float angle = 0.090f * ( (int) time );
+        // we need to reset the rotation matrix for the triangle
+        Matrix.setRotateM ( rotationMatrix, 0, angle, 0, 0, - 1.0f );
+
+        // the vPMMatrix hasn't changed, so now we just multiply vPMatrix * rotationMatrix and store the result in scratch
+        Matrix.multiplyMM ( scratch, 0, vPMatrix, 0, rotationMatrix, 0 );
+
+        // Draw the triangle now
         mTriangle.draw ( scratch );
 
-        // mSquare.draw();
+        JCGLDebugger.checkGLError ( "onDrawFrame: after mTriangle.draw" );
+
+        // DEBUGGING
+        //   JCGLDebugger.checkGLError ( "onDrawFrame" );
     }
 
     public float getAngle () {
@@ -95,18 +129,4 @@ public class JCGLRenderer implements GLSurfaceView.Renderer {
         mAngle = angle;
     }
 
-    public static int loadShader ( int type, String shaderCode ) {
-        // DEBUGGING
-        Log.d ( TAG, "loadShader called" );
-
-        // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
-        // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
-        int shader = GLES20.glCreateShader ( type );
-
-        // add the source code to the shader and compile it
-        GLES20.glShaderSource ( shader, shaderCode );
-        GLES20.glCompileShader ( shader );
-
-        return shader;
-    }
 }

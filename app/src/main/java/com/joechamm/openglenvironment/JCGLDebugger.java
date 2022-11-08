@@ -1,9 +1,8 @@
 package com.joechamm.openglenvironment;
 
 import android.opengl.GLES20;
-import android.util.Log;
-
 import android.opengl.GLU;
+import android.util.Log;
 
 public class JCGLDebugger {
 
@@ -19,4 +18,5 @@ public class JCGLDebugger {
             Log.e ( TAG, op + ": glError " + errStr );
         }
     }
+
 }

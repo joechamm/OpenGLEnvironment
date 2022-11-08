@@ -1,54 +1,137 @@
 package com.joechamm.openglenvironment;
 
+import android.content.Context;
 import android.opengl.GLES20;
 import android.util.Log;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
+
+public class Square {
+    private static final String TAG = "jcglenv:square";
+
+    private final PosColVertexClientBuffer mVertexBuffer;
+    private final ShortBuffer mIndexBuffer;
+
+    static final float[] squareVertices = {  // vertices tightly packed as {x,y,z,r,g,b,a}
+            // top left
+            - 0.5f, 0.5f, 0.0f, 0.87f, 0.02f, 0.08f, 0.85f,
+            // bottom left
+            - 0.5f, - 0.5f, 0.0f, 0.87f, 0.02f, 0.08f, 0.85f,
+            // bottom right
+            0.5f, - 0.5f, 0.0f, 0.87f, 0.02f, 0.08f, 0.85f,
+            // top right
+            0.5f, 0.5f, 0.0f, 0.87f, 0.02f, 0.08f, 0.85f
+    };
+
+    private short[] indices = {
+            0, 1, 2, // top left, bottom left, bottom right
+            0, 2, 3  // top left, bottom right, top right
+    };
+
+    // SHADER PROGRAM MEMBERS
+    private final SquareShader mShader;
+
+    public Square ( Context context ) {
+        // DEBUGGING
+        Log.d ( TAG, "ctor called" );
+
+        JCGLDebugger.checkGLError ( "before square shader creation" );
+        mShader = new SquareShader ( context );
+        JCGLDebugger.checkGLError ( "after square shader creation, before vertex buffer creation" );
+        mVertexBuffer = new PosColVertexClientBuffer ( squareVertices );
+        JCGLDebugger.checkGLError ( "after vertex buffer creation, before index buffer creation" );
+
+        // initialize byte buffer for the draw list
+        ByteBuffer ib = ByteBuffer.allocateDirect (
+                // (# of coordinate values * 2 bytes per short)
+                indices.length * Constants.BYTES_PER_SHORT );
+        ib.order ( ByteOrder.nativeOrder () );
+
+        mIndexBuffer = ib.asShortBuffer ();
+        mIndexBuffer.put ( indices );
+        mIndexBuffer.position ( 0 );
+
+        JCGLDebugger.checkGLError ( "after index buffer creation" );
+
+    }
+
+    public void draw ( float[] mvpMatrix ) {
+        // Add program to OpenGL ES environment
+        //    GLES20.glUseProgram ( mProgram );
+        // bind shader program
+        mShader.useProgram ();
+
+        int posLoc = mShader.getaLoc_position ();
+        int colLoc = mShader.getaLoc_color ();
+        int mvpLoc = mShader.getuLoc_uMVP ();
+
+        int vertexByteStride = ( Constants.POSITION_ELEMENT_COUNT + Constants.COLOR_ELEMENT_COUNT ) * Constants.BYTES_PER_FLOAT;
+        int posByteOffset = 0;
+        int colByteOffset = Constants.POSITION_ELEMENT_COUNT * Constants.BYTES_PER_FLOAT;
+        int vertexCount = 4;
+        // set uniforms
+
+        GLES20.glUniformMatrix4fv ( mvpLoc, 1, false, mvpMatrix, 0 );
+
+        GLES20.glEnableVertexAttribArray ( posLoc );
+        GLES20.glVertexAttribPointer ( posLoc, Constants.POSITION_ELEMENT_COUNT, GLES20.GL_FLOAT, false, vertexByteStride,
+                                       mVertexBuffer.getFloatBuffer ().position ( posByteOffset ) );
+
+        GLES20.glEnableVertexAttribArray ( colLoc );
+        GLES20.glVertexAttribPointer ( colLoc, Constants.COLOR_ELEMENT_COUNT, GLES20.GL_FLOAT, false, vertexByteStride,
+                                       mVertexBuffer.getFloatBuffer ().position ( colByteOffset ) );
+
+        // make call to draw
+        GLES20.glDrawElements ( GLES20.GL_TRIANGLES, vertexCount, GLES20.GL_SHORT, mIndexBuffer );
+
+        // reset state
+        GLES20.glDisableVertexAttribArray ( posLoc );
+        GLES20.glDisableVertexAttribArray ( colLoc );
+        GLES20.glUseProgram ( 0 );
+    }
+}
+/*
 
 public class Square {
 
     private static final String TAG = "jcglenv:square";
 
     // GEOMETRY MEMBERS
-    private FloatBuffer mVertexBuffer;
-    private ShortBuffer mDrawListBuffer;
+    private final VertexBuffer mVertexBuffer;
+    private final IndexBuffer mIndexBuffer;
 
     // number of coordinates per vertex in this array
-    static final int COORDS_PER_VERTEX = 3;
-    static float[] squareCoords = {
-            - 0.5f, 0.5f, 0.0f,   // top left
-            - 0.5f, - 0.5f, 0.0f,   // bottom left
-            0.5f, - 0.5f, 0.0f,   // bottom right
-            0.5f, 0.5f, 0.0f }; // top right
+    static final int COORDS_PER_VERTEX = 4;
+    static final float[] squareCoords = {
+            - 0.5f,   0.5f, 0.0f, 1.0f,   // top left
+            - 0.5f, - 0.5f, 0.0f, 1.0f,   // bottom left
+              0.5f, - 0.5f, 0.0f, 1.0f,  // bottom right
+              0.5f,   0.5f, 0.0f, 1.0f }; // top right
+
+    // square color
+    static final float[] squareColor = {
+            0.87f, 0.08f, 0.02f, 1.0f
+    };
 
     private short[] drawOrder = { 0, 1, 2, 0, 2, 3 }; // order to draw vertices
 
+    private final int vertexCount = squareCoords.length / COORDS_PER_VERTEX;
+    private final int vertexStride = COORDS_PER_VERTEX * Constants.BYTES_PER_FLOAT; // 4 bytes per vertex
+
     // SHADER PROGRAM MEMBERS
-    private final String vsCode =
-            "attribute vec4 vPosition;" +
-                    "void main() {" +
-                    "   gl_Position = vPosition;" +
-                    "}";
+    private final SquareShader mShader;
 
-    private final String fsCode =
-            "precision mediump float;" +
-                    "uniform vec4 vColor;" +
-                    "void main() {" +
-                    "   gl_FragColor = vColor;" +
-                    "}";
-
-    private final int mProgram;
-    // TODO: use uniform naming scheme (e.g. uniform locations uLocName, attribute locations aLocName, etc...)
-    private int mPositionHandle;
-    private int mColorHandle;
-
-    public Square () {
+    public Square ( Context context) {
         // DEBUGGING
         Log.d ( TAG, "Square ctor called" );
 
+        mShader = new SquareShader ( context );
+        mVertexBuffer = new VertexBuffer ( squareCoords );
+        mIndexBuffer = new IndexBuffer ( drawOrder );
+*/
+/*
         // initialize vertex byte buffer for shape coordinates
         ByteBuffer bb = ByteBuffer.allocateDirect (
                 // (number of coordinate values * 4 bytes per float
@@ -85,14 +168,41 @@ public class Square {
         GLES20.glAttachShader ( mProgram, fsHandle );
 
         // creates OpenGL ES program executables
-        GLES20.glLinkProgram ( mProgram );
+        GLES20.glLinkProgram ( mProgram );*//*
+
 
     }
 
-    public void draw () {
+    public void draw (float[] mvpMatrix) {
         // Add program to OpenGL ES environment
-        GLES20.glUseProgram ( mProgram );
+    //    GLES20.glUseProgram ( mProgram );
+        // bind shader program
+        mShader.useProgram ();
+        // set uniforms
+        GLES20.glUniform4fv ( mShader.getuLoc_vColor (), 1, squareColor, 0 );
+        GLES20.glUniformMatrix4fv ( mShader.getuLoc_uMVP (), 1, false, mvpMatrix, 0 );
 
-        // TODO
+        int ibo = mIndexBuffer.getHandle ();
+        int vbo = mVertexBuffer.getHandle ();
+
+        GLES20.glBindBuffer ( GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo );
+        GLES20.glBindBuffer ( GLES20.GL_ARRAY_BUFFER, vbo );
+        GLES20.glEnableVertexAttribArray ( mShader.getaLoc_vPosition () );
+        GLES20.glVertexAttribPointer ( mShader.getaLoc_vPosition (), COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, vertexStride, 0 );
+
+        // bind index buffer
+ //       mIndexBuffer.bind ();
+        // bind vertex buffer (just positions here)
+ //       mVertexBuffer.bind ( mShader.getaLoc_vPosition (), COORDS_PER_VERTEX, vertexStride, vertexCount );
+
+        // make call to draw
+        GLES20.glDrawElements ( GLES20.GL_TRIANGLES, vertexCount, GLES20.GL_SHORT, 0 );
+
+        // reset state
+        GLES20.glDisableVertexAttribArray ( mShader.getaLoc_vPosition () );
+        GLES20.glBindBuffer ( GLES20.GL_ARRAY_BUFFER, 0 );
+        GLES20.glBindBuffer ( GLES20.GL_ELEMENT_ARRAY_BUFFER, 0 );
+        GLES20.glUseProgram ( 0 );
     }
 }
+*/

@@ -6,7 +6,7 @@ import android.util.Log;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.IntBuffer;
+import java.nio.ShortBuffer;
 
 public class Square {
     private static final String TAG = "jcglenv:square";
@@ -27,7 +27,7 @@ public class Square {
             0.5f, 0.5f, 0.0f, 0.87f, 0.02f, 0.08f, 0.85f
     };
 
-    private final int[] indices = {
+    private final short[] indices = {
             0, 1, 2, // top left, bottom left, bottom right
             0, 2, 3  // top left, bottom right, top right
     };
@@ -55,9 +55,9 @@ public class Square {
 //        mIndexBuffer.put ( indices );
 //        mIndexBuffer.position ( 0 );
 
-        final IntBuffer squareIndexBuffer = ByteBuffer.allocateDirect ( indices.length * Constants.BYTES_PER_INT )
-                                                      .order ( ByteOrder.nativeOrder () )
-                                                      .asIntBuffer ();
+        final ShortBuffer squareIndexBuffer = ByteBuffer.allocateDirect ( indices.length * Constants.BYTES_PER_SHORT )
+                                                        .order ( ByteOrder.nativeOrder () )
+                                                        .asShortBuffer ();
 
         squareIndexBuffer.put ( indices ).position ( 0 );
 
@@ -66,7 +66,7 @@ public class Square {
             JCGLDebugger.checkGLError ( "after glGenBuffers(1,mIBO,0), before glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, mIBO[0]" );
             GLES20.glBindBuffer ( GLES20.GL_ELEMENT_ARRAY_BUFFER, mIBO[ 0 ] );
             JCGLDebugger.checkGLError ( "after glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, mIBO[0], before glBufferData" );
-            GLES20.glBufferData ( GLES20.GL_ELEMENT_ARRAY_BUFFER, squareIndexBuffer.capacity () * Constants.BYTES_PER_INT,
+            GLES20.glBufferData ( GLES20.GL_ELEMENT_ARRAY_BUFFER, squareIndexBuffer.capacity () * Constants.BYTES_PER_SHORT,
                                   squareIndexBuffer, GLES20.GL_STATIC_DRAW );
             JCGLDebugger.checkGLError ( "after glBufferData, before glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)" );
             GLES20.glBindBuffer ( GLES20.GL_ELEMENT_ARRAY_BUFFER, 0 );
@@ -121,7 +121,8 @@ public class Square {
 
         JCGLDebugger.checkGLError ( "Square:draw afer glBindBuffer, before glDrawElements" );
 
-        GLES20.glDrawElements ( GLES20.GL_TRIANGLES, COUNT, GLES20.GL_INT, 0 );
+        // *** glDrawElements TYPE MUST BE 'GL_UNSIGNED_BYTE' 'GL_UNSIGNED_SHORT' or 'GL_UNSIGNED_INT' -- NO SIGNED INTEGER TYPES!!! --- ***
+        GLES20.glDrawElements ( GLES20.GL_TRIANGLES, COUNT, GLES20.GL_UNSIGNED_SHORT, 0 );
 
         JCGLDebugger.checkGLError ( "Square:draw afer glDrawElements, before glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)" );
 

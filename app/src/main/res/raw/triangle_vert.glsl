@@ -1,13 +1,16 @@
-#version 100
+#version 320 es
 
-// This matrix member variable provides a hook to manipulate
-// the coordinates of the objects that use this vertex shader
-uniform mat4 uMVP;
-attribute vec4 vPosition;
+layout (location = 0) in vec3 a_position;
 
-// the matrix must be included as a modifier of gl_Position
-// Note that the uMVPMatrix factor *must be first* in order
-// for the matrix multiplication product to be correct.
+layout (std140, binding = 7) uniform PerFrameUniforms
+{
+   mat4 Proj;
+   mat4 View;
+   mat4 Model;
+} perFrameUniforms;
+
 void main() {
-   gl_Position = uMVP * vPosition;
+   mat4 projView = perFrameUniforms.Proj * perFrameUniforms.View;
+   mat4 mvp = projView * perFrameUniforms.Model;
+   gl_Position = mvp * vec4(a_position, 1.0);
 }

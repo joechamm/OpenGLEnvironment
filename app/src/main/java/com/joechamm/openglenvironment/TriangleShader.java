@@ -1,30 +1,24 @@
 package com.joechamm.openglenvironment;
 
 import android.content.Context;
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 
 class TriangleShader extends ShaderProgram {
 
-    private final int aLoc_vPosition;
-    private final int uLoc_vColor;
-    private final int uLoc_uMVP;
+    private final int aLoc_position;
+    private final int uLoc_color;
 
     TriangleShader ( Context context ) {
         super ( context, R.raw.triangle_vert, R.raw.triangle_frag );
-        aLoc_vPosition = GLES20.glGetAttribLocation ( mProgram, "vPosition" );
-        uLoc_vColor = GLES20.glGetUniformLocation ( mProgram, "vColor" );
-        uLoc_uMVP = GLES20.glGetUniformLocation ( mProgram, "uMVP" );
+        aLoc_position = GLES32.glGetAttribLocation ( mProgram, "a_position" );
+        uLoc_color = GLES32.glGetUniformLocation ( mProgram, "u_color" );
     }
 
     int getaLoc_vPosition () {
-        return aLoc_vPosition;
+        return aLoc_position;
     }
 
     int getuLoc_vColor () {
-        return uLoc_vColor;
-    }
-
-    int getuLoc_uMVP () {
-        return uLoc_uMVP;
+        return uLoc_color;
     }
 }

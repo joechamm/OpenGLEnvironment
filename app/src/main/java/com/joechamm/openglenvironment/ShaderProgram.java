@@ -1,7 +1,7 @@
 package com.joechamm.openglenvironment;
 
 import android.content.Context;
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 import android.util.Log;
 
 abstract class ShaderProgram {
@@ -44,6 +44,6 @@ abstract class ShaderProgram {
     }
 
     public void useProgram () {
-        GLES20.glUseProgram ( mProgram );
+        GLES32.glUseProgram ( mProgram );
     }
 }

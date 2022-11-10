@@ -17,6 +17,9 @@ android {
 
         // is this a debug build? // https://riptutorial.com/android/example/2542/define-and-use-build-configuration-fields
         buildConfigField "boolean", "IS_DEBUGGING", "false"
+
+        // pass in binding points for shaders
+        //    buildConfigField "int","BIND_IDX_UNIFORMS", 7
     }
 
     buildTypes {

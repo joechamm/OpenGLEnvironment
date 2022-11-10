@@ -1,6 +1,6 @@
 package com.joechamm.openglenvironment;
 
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 import android.opengl.GLU;
 import android.opengl.GLUtils;
 import android.util.Log;
@@ -86,59 +86,59 @@ public class JCGLContextHelper {
         }
         // same for OpenGL ES errors
         if ( glesIntErrorToStringMap.isEmpty () ) {
-            glesIntErrorToStringMap.put ( GLES20.GL_NO_ERROR, "GL_NO_ERROR" );
-            glesIntErrorToStringMap.put ( GLES20.GL_INVALID_ENUM, "GL_INVALID_ENUM" );
-            glesIntErrorToStringMap.put ( GLES20.GL_INVALID_FRAMEBUFFER_OPERATION, "GL_INVALID_FRAMEBUFFER_OPERATION" );
-            glesIntErrorToStringMap.put ( GLES20.GL_INVALID_VALUE, "GL_INVALID_VALUE" );
-            glesIntErrorToStringMap.put ( GLES20.GL_INVALID_OPERATION, "GL_INVALID_OPERATION" );
-            glesIntErrorToStringMap.put ( GLES20.GL_OUT_OF_MEMORY, "GL_OUT_OF_MEMORY" );
+            glesIntErrorToStringMap.put ( GLES32.GL_NO_ERROR, "GL_NO_ERROR" );
+            glesIntErrorToStringMap.put ( GLES32.GL_INVALID_ENUM, "GL_INVALID_ENUM" );
+            glesIntErrorToStringMap.put ( GLES32.GL_INVALID_FRAMEBUFFER_OPERATION, "GL_INVALID_FRAMEBUFFER_OPERATION" );
+            glesIntErrorToStringMap.put ( GLES32.GL_INVALID_VALUE, "GL_INVALID_VALUE" );
+            glesIntErrorToStringMap.put ( GLES32.GL_INVALID_OPERATION, "GL_INVALID_OPERATION" );
+            glesIntErrorToStringMap.put ( GLES32.GL_OUT_OF_MEMORY, "GL_OUT_OF_MEMORY" );
         }
     }
 
     private static void initGLESBufferTargetMap () {
         if ( glesBufferTargetToStringMap.isEmpty () ) {
-            glesBufferTargetToStringMap.put ( GLES20.GL_ARRAY_BUFFER, "GL_ARRAY_BUFFER" );
-            glesBufferTargetToStringMap.put ( GLES20.GL_ELEMENT_ARRAY_BUFFER, "GL_ELEMENT_ARRAY_BUFFER" );
+            glesBufferTargetToStringMap.put ( GLES32.GL_ARRAY_BUFFER, "GL_ARRAY_BUFFER" );
+            glesBufferTargetToStringMap.put ( GLES32.GL_ELEMENT_ARRAY_BUFFER, "GL_ELEMENT_ARRAY_BUFFER" );
         }
     }
 
     private static void initGLESBufferUsageMap () {
         if ( glesBufferUsageToStringMap.isEmpty () ) {
-            glesBufferUsageToStringMap.put ( GLES20.GL_STATIC_DRAW, "GL_STATIC_DRAW" );
-            glesBufferUsageToStringMap.put ( GLES20.GL_STREAM_DRAW, "GL_STREAM_DRAW" );
-            glesBufferUsageToStringMap.put ( GLES20.GL_DYNAMIC_DRAW, "GL_DYNAMIC_DRAW" );
+            glesBufferUsageToStringMap.put ( GLES32.GL_STATIC_DRAW, "GL_STATIC_DRAW" );
+            glesBufferUsageToStringMap.put ( GLES32.GL_STREAM_DRAW, "GL_STREAM_DRAW" );
+            glesBufferUsageToStringMap.put ( GLES32.GL_DYNAMIC_DRAW, "GL_DYNAMIC_DRAW" );
         }
     }
 
     private static void initGLESDataTypeMap () {
         if ( glesDataTypeToStringMap.isEmpty () ) {
-            glesDataTypeToStringMap.put ( GLES20.GL_BOOL, "GL_BOOL" );
-            glesDataTypeToStringMap.put ( GLES20.GL_BYTE, "GL_BYTE" );
-            glesDataTypeToStringMap.put ( GLES20.GL_UNSIGNED_BYTE, "GL_UNSIGNED_BYTE" );
-            glesDataTypeToStringMap.put ( GLES20.GL_SHORT, "GL_SHORT" );
-            glesDataTypeToStringMap.put ( GLES20.GL_UNSIGNED_SHORT, "GL_UNSIGNED_SHORT" );
-            glesDataTypeToStringMap.put ( GLES20.GL_INT, "GL_INT" );
-            glesDataTypeToStringMap.put ( GLES20.GL_UNSIGNED_INT, "GL_UNSIGNED_INT" );
-            glesDataTypeToStringMap.put ( GLES20.GL_FLOAT, "GL_FLOAT" );
+            glesDataTypeToStringMap.put ( GLES32.GL_BOOL, "GL_BOOL" );
+            glesDataTypeToStringMap.put ( GLES32.GL_BYTE, "GL_BYTE" );
+            glesDataTypeToStringMap.put ( GLES32.GL_UNSIGNED_BYTE, "GL_UNSIGNED_BYTE" );
+            glesDataTypeToStringMap.put ( GLES32.GL_SHORT, "GL_SHORT" );
+            glesDataTypeToStringMap.put ( GLES32.GL_UNSIGNED_SHORT, "GL_UNSIGNED_SHORT" );
+            glesDataTypeToStringMap.put ( GLES32.GL_INT, "GL_INT" );
+            glesDataTypeToStringMap.put ( GLES32.GL_UNSIGNED_INT, "GL_UNSIGNED_INT" );
+            glesDataTypeToStringMap.put ( GLES32.GL_FLOAT, "GL_FLOAT" );
         }
     }
 
     private static void initGLESDrawModeMap () {
         if ( glesDrawModeToStringMap.isEmpty () ) {
-            glesDrawModeToStringMap.put ( GLES20.GL_POINTS, "GL_POINTS" );
-            glesDrawModeToStringMap.put ( GLES20.GL_LINE_STRIP, "GL_LINE_STRIP" );
-            glesDrawModeToStringMap.put ( GLES20.GL_LINE_LOOP, "GL_LINE_LOOP" );
-            glesDrawModeToStringMap.put ( GLES20.GL_LINES, "GL_LINES" );
-            glesDrawModeToStringMap.put ( GLES20.GL_TRIANGLE_STRIP, "GL_TRIANGLE_STRIP" );
-            glesDrawModeToStringMap.put ( GLES20.GL_TRIANGLE_FAN, "GL_TRIANGLE_FAN" );
-            glesDrawModeToStringMap.put ( GLES20.GL_TRIANGLES, "GL_TRIANGLES" );
+            glesDrawModeToStringMap.put ( GLES32.GL_POINTS, "GL_POINTS" );
+            glesDrawModeToStringMap.put ( GLES32.GL_LINE_STRIP, "GL_LINE_STRIP" );
+            glesDrawModeToStringMap.put ( GLES32.GL_LINE_LOOP, "GL_LINE_LOOP" );
+            glesDrawModeToStringMap.put ( GLES32.GL_LINES, "GL_LINES" );
+            glesDrawModeToStringMap.put ( GLES32.GL_TRIANGLE_STRIP, "GL_TRIANGLE_STRIP" );
+            glesDrawModeToStringMap.put ( GLES32.GL_TRIANGLE_FAN, "GL_TRIANGLE_FAN" );
+            glesDrawModeToStringMap.put ( GLES32.GL_TRIANGLES, "GL_TRIANGLES" );
         }
     }
 
     private static void initGLESShaderTypeMap () {
         if ( glesShaderTypeToStringMap.isEmpty () ) {
-            glesShaderTypeToStringMap.put ( GLES20.GL_VERTEX_SHADER, "GL_VERTEX_SHADER" );
-            glesShaderTypeToStringMap.put ( GLES20.GL_FRAGMENT_SHADER, "GL_FRAGMENT_SHADER" );
+            glesShaderTypeToStringMap.put ( GLES32.GL_VERTEX_SHADER, "GL_VERTEX_SHADER" );
+            glesShaderTypeToStringMap.put ( GLES32.GL_FRAGMENT_SHADER, "GL_FRAGMENT_SHADER" );
         }
     }
 

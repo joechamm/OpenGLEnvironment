@@ -1,8 +1,8 @@
 package com.joechamm.openglenvironment;
 
 import android.content.Context;
-import android.graphics.Shader;
-import android.opengl.GLES20;
+import android.opengl.GLES32;
+import android.opengl.Matrix;
 import android.util.Log;
 
 import java.nio.ByteBuffer;
@@ -32,9 +32,13 @@ public class Triangle {
     private final int vertexCount = triangleCoords.length / COORDS_PER_VERTEX;
     private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
+    private float[] mModelMatrix = new float[ 16 ];
+
     public Triangle ( Context context ) {
         // DEBUGGING
         Log.d ( TAG, "Triangle ctor called" );
+
+        Matrix.setIdentityM ( mModelMatrix, 0 );
 
         // initialize vertex byte buffer for shape coordinates
         ByteBuffer bb = ByteBuffer.allocateDirect (
@@ -55,35 +59,44 @@ public class Triangle {
 
     }
 
-    public void draw ( float[] mvpMatrix ) {
+    public void draw ( PerFrameUniforms perFrameUniforms ) {
+        // set model matrix
+        perFrameUniforms.setModelMatrix ( mModelMatrix );
+        // update uniform buffer now
+        perFrameUniforms.updateBuffer ();
+
         // Add program to OpenGL ES environment
-        //       GLES20.glUseProgram ( mProgram );
+        //       GLES32.glUseProgram ( mProgram );
         mShader.useProgram ();
 
         // Enable a handle to the triangle vertices
-        //     GLES20.glEnableVertexAttribArray ( aLoc_vPosition );
+        //     GLES32.glEnableVertexAttribArray ( aLoc_vPosition );
 
-        GLES20.glEnableVertexAttribArray ( mShader.getaLoc_vPosition () );
+        GLES32.glEnableVertexAttribArray ( mShader.getaLoc_vPosition () );
         // Prepare the triangle coordinate data
 
-        GLES20.glVertexAttribPointer ( mShader.getaLoc_vPosition (), COORDS_PER_VERTEX,
-                                       GLES20.GL_FLOAT, false,
+        GLES32.glVertexAttribPointer ( mShader.getaLoc_vPosition (), COORDS_PER_VERTEX,
+                                       GLES32.GL_FLOAT, false,
                                        vertexStride, mVertexBuffer );
 
         // set color for drawing the triangle
-        //       GLES20.glUniform4fv ( uLoc_vColor, 1, color, 0 );
-        GLES20.glUniform4fv ( mShader.getuLoc_vColor (), 1, color, 0 );
+        //       GLES32.glUniform4fv ( uLoc_vColor, 1, color, 0 );
+        GLES32.glUniform4fv ( mShader.getuLoc_vColor (), 1, color, 0 );
 
         // Pass the projection and view transformation to the shader
-        //       GLES20.glUniformMatrix4fv ( uLoc_uMVP, 1, false, mvpMatrix, 0 );
-        GLES20.glUniformMatrix4fv ( mShader.getuLoc_uMVP (), 1, false, mvpMatrix, 0 );
+        //       GLES32.glUniformMatrix4fv ( uLoc_uMVP, 1, false, mvpMatrix, 0 );
+        //   GLES32.glUniformMatrix4fv ( mShader.getuLoc_uMVP (), 1, false, mvpMatrix, 0 );
 
         // Draw the triangle
-        GLES20.glDrawArrays ( GLES20.GL_TRIANGLES, 0, vertexCount );
+        GLES32.glDrawArrays ( GLES32.GL_TRIANGLES, 0, vertexCount );
 
         // Disable vertex array
-        //       GLES20.glDisableVertexAttribArray ( aLoc_vPosition );
-        GLES20.glDisableVertexAttribArray ( mShader.getaLoc_vPosition () );
+        //       GLES32.glDisableVertexAttribArray ( aLoc_vPosition );
+        GLES32.glDisableVertexAttribArray ( mShader.getaLoc_vPosition () );
 
+    }
+
+    public void rotate ( float angle, float axisX, float axisY, float axisZ ) {
+        Matrix.rotateM ( mModelMatrix, 0, angle, axisX, axisY, axisZ );
     }
 }

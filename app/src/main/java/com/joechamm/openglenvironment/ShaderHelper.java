@@ -2,7 +2,7 @@ package com.joechamm.openglenvironment;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.opengl.GLES20;
+import android.opengl.GLES32;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -44,37 +44,37 @@ public class ShaderHelper {
     public static int compileVertexShader ( String shaderCode ) {
         Log.d ( TAG, "compileVertexShader called" );
         Log.v ( TAG, "Shader Code: \n" + shaderCode );
-        return compileShader ( GLES20.GL_VERTEX_SHADER, shaderCode );
+        return compileShader ( GLES32.GL_VERTEX_SHADER, shaderCode );
     }
 
     public static int compileFragmentShader ( String shaderCode ) {
         Log.d ( TAG, "compileFragmentShader called" );
         Log.v ( TAG, "Shader Code: \n" + shaderCode );
-        return compileShader ( GLES20.GL_FRAGMENT_SHADER, shaderCode );
+        return compileShader ( GLES32.GL_FRAGMENT_SHADER, shaderCode );
     }
 
     private static int compileShader ( final int shaderType, String shaderCode ) {
 
-        final int handle = GLES20.glCreateShader ( shaderType );
+        final int handle = GLES32.glCreateShader ( shaderType );
         try {
 
             if ( 0 == handle ) {
                 throw new RuntimeException ( "Invalid Shader Type" );
             }
 
-            GLES20.glShaderSource ( handle, shaderCode );
-            GLES20.glCompileShader ( handle );
+            GLES32.glShaderSource ( handle, shaderCode );
+            GLES32.glCompileShader ( handle );
 
             final int[] params = new int[ 1 ];
 
-            GLES20.glGetShaderiv ( handle, GLES20.GL_COMPILE_STATUS, params, 0 );
-            if ( GLES20.GL_FALSE == params[ 0 ] ) {
+            GLES32.glGetShaderiv ( handle, GLES32.GL_COMPILE_STATUS, params, 0 );
+            if ( GLES32.GL_FALSE == params[ 0 ] ) {
                 String infoLog = getShaderInfoLog ( handle );
                 throw new RuntimeException ( infoLog );
             }
         } catch ( RuntimeException e ) {
             Log.e ( TAG, "error compiling shader: " + e.getMessage (), e );
-            GLES20.glDeleteShader ( handle );
+            GLES32.glDeleteShader ( handle );
             return 0;
         }
 
@@ -82,7 +82,7 @@ public class ShaderHelper {
     }
 
     public static String getShaderInfoLog ( final int shaderHandle ) {
-        return GLES20.glGetShaderInfoLog ( shaderHandle );
+        return GLES32.glGetShaderInfoLog ( shaderHandle );
     }
 
     public static int createAndLinkProgram (
@@ -90,7 +90,7 @@ public class ShaderHelper {
             final int fragmentShaderHandle,
             final String[] attributes
     ) {
-        final int program = GLES20.glCreateProgram ();
+        final int program = GLES32.glCreateProgram ();
 
         try {
 
@@ -102,37 +102,37 @@ public class ShaderHelper {
                 throw new RuntimeException ( "Error creating program" );
             }
 
-            GLES20.glAttachShader ( program, vertexShaderHandle );
-            GLES20.glAttachShader ( program, fragmentShaderHandle );
+            GLES32.glAttachShader ( program, vertexShaderHandle );
+            GLES32.glAttachShader ( program, fragmentShaderHandle );
 
             // Bind attributes
             if ( null != attributes ) {
                 final int len = attributes.length;
                 for ( int i = 0; i < len; i++ ) {
-                    GLES20.glBindAttribLocation ( program, i, attributes[ i ] );
+                    GLES32.glBindAttribLocation ( program, i, attributes[ i ] );
                 }
             }
 
-            GLES20.glLinkProgram ( program );
+            GLES32.glLinkProgram ( program );
 
             // check the status
             final int[] status = new int[ 1 ];
-            GLES20.glGetProgramiv ( program, GLES20.GL_LINK_STATUS, status, 0 );
-            if ( GLES20.GL_FALSE == status[ 0 ] ) {
+            GLES32.glGetProgramiv ( program, GLES32.GL_LINK_STATUS, status, 0 );
+            if ( GLES32.GL_FALSE == status[ 0 ] ) {
                 String infoLog = getProgramInfoLog ( program );
 
                 throw new RuntimeException ( infoLog );
             } else {
                 // our program is created and linked, so no need to keep the shaders
-                GLES20.glDeleteShader ( vertexShaderHandle );
-                GLES20.glDeleteShader ( fragmentShaderHandle );
+                GLES32.glDeleteShader ( vertexShaderHandle );
+                GLES32.glDeleteShader ( fragmentShaderHandle );
             }
 
         } catch ( Exception e ) {
             Log.e ( TAG, "error linking program: " + e.getMessage (), e );
-            GLES20.glDeleteShader ( vertexShaderHandle );
-            GLES20.glDeleteShader ( fragmentShaderHandle );
-            GLES20.glDeleteProgram ( program );
+            GLES32.glDeleteShader ( vertexShaderHandle );
+            GLES32.glDeleteShader ( fragmentShaderHandle );
+            GLES32.glDeleteProgram ( program );
             return 0;
         }
 
@@ -140,24 +140,24 @@ public class ShaderHelper {
     }
 
     public static String getProgramInfoLog ( final int program ) {
-        return GLES20.glGetProgramInfoLog ( program );
+        return GLES32.glGetProgramInfoLog ( program );
     }
 
     public static int getUniformLocation ( final int program, final String uniformName ) {
-        return GLES20.glGetUniformLocation ( program, uniformName );
+        return GLES32.glGetUniformLocation ( program, uniformName );
     }
 
     public static int getAttributeLocation ( final int program, final String attributeName ) {
-        return GLES20.glGetAttribLocation ( program, attributeName );
+        return GLES32.glGetAttribLocation ( program, attributeName );
     }
 
     public static boolean validateShaderProgram ( final int program ) {
-        GLES20.glValidateProgram ( program );
+        GLES32.glValidateProgram ( program );
         final int[] validated = new int[ 1 ];
-        GLES20.glGetProgramiv ( program, GLES20.GL_VALIDATE_STATUS, validated, 0 );
-        String infoLog = GLES20.glGetProgramInfoLog ( program );
+        GLES32.glGetProgramiv ( program, GLES32.GL_VALIDATE_STATUS, validated, 0 );
+        String infoLog = GLES32.glGetProgramInfoLog ( program );
         String validationStatus;
-        if ( validated[ 0 ] == GLES20.GL_TRUE ) {
+        if ( validated[ 0 ] == GLES32.GL_TRUE ) {
             validationStatus = "GL_TRUE";
         } else {
             validationStatus = "GL_FALSE";

@@ -3,11 +3,13 @@ package com.joechamm.openglenvironment;
 import android.opengl.GLES32;
 import android.util.Log;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
+import java.util.Formatter;
 
 public class BufferHelper {
 
@@ -234,5 +236,70 @@ public class BufferHelper {
         floatBuffer.put ( data );
         floatBuffer.position ( 0 );
         return makeUniformBuffer ( byteBuffer, GLES32.GL_STREAM_READ );
+    }
+
+    // TODO: dump buffer info
+
+    private static Buffer getGPUBuffer ( int target, int name ) {
+        GLES32.glBindBuffer ( target, name );
+        Buffer gpuBuffer = GLES32.glGetBufferPointerv ( target, GLES32.GL_BUFFER_MAP_POINTER );
+        GLES32.glBindBuffer ( target, 0 );
+        return gpuBuffer;
+    }
+
+    public static FloatBuffer getGPUFloatBuffer ( int target, int name ) {
+        Buffer gpuBuffer = getGPUBuffer ( target, name );
+        FloatBuffer gpuFloatBuffer = (FloatBuffer) gpuBuffer;
+        return gpuFloatBuffer;
+    }
+
+    public static float[] getGPUFloatArray ( int target, int name ) {
+        FloatBuffer gpuFloatBuffer = getGPUFloatBuffer ( target, name );
+        return gpuFloatBuffer.array ();
+    }
+
+    public static void dumpGPUFloatBuffer ( int target, int name ) {
+        float[] data = getGPUFloatArray ( target, name );
+        // how many floats to print before a line break
+        final int LINE_BREAK_AT = 80;
+
+        // how many floats are there?
+        int count = data.length;
+        // how many line breaks will there be?
+        int lineBreakCount = count / LINE_BREAK_AT + 1;
+        // use scientific notation to format each float to 7 places
+        final int CHAR_FIELD_LEN = 7;
+        final int DECIMAL_PLACES = 4;
+        Formatter fmt = new Formatter ();
+        final String fmtStr = "%" + CHAR_FIELD_LEN + "." + DECIMAL_PLACES + "e";
+
+        // String builder capacity is (CHARS_PER_FLOAT + 1 PER COMMA) * FLOAT_COUNT + LINE_BREAKS
+        int strBldCapacity = ( CHAR_FIELD_LEN + 1 ) * count + lineBreakCount;
+
+        String preamble = "--- DUMPING GPU FLOAT BUFFER ---\n";
+        String labelStr = "Label: ";
+        String floatCount = "Float Count: " + count + "\n";
+        String targetStr = "Buffer Target: " + JCGLContextHelper.getOpenGLESBufferTargetString ( target ) + "\n";
+        if ( JCGLDebugger.DEBUGGING ) {
+            String str = JCGLDebugger.getBufferLabel ( name ) + "\n";
+            labelStr.concat ( str );
+        } else {
+            String str = name + "\n";
+            labelStr.concat ( str );
+        }
+
+        Log.d ( TAG, preamble );
+        Log.d ( TAG, labelStr );
+        Log.d ( TAG, targetStr );
+        Log.d ( TAG, floatCount );
+
+        StringBuilder stringBuilder = new StringBuilder ( strBldCapacity );
+        for ( int i = 0; i < count; i++ ) {
+            stringBuilder.append ( data[ i ] );
+            stringBuilder.append ( ',' );
+        }
+
+        String dataStr = stringBuilder.toString ();
+        Log.d ( TAG, dataStr );
     }
 }

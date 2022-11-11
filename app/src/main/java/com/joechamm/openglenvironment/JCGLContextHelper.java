@@ -1,19 +1,38 @@
 package com.joechamm.openglenvironment;
 
+import android.opengl.EGL14;
+import android.opengl.EGL15;
+import android.opengl.GLES20;
+import android.opengl.GLES30;
+import android.opengl.GLES31;
 import android.opengl.GLES32;
 import android.opengl.GLU;
 import android.opengl.GLUtils;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import java.util.HashMap;
 import java.util.Set;
 
 import javax.microedition.khronos.egl.EGL10;
+import javax.microedition.khronos.egl.EGL11;
 import javax.microedition.khronos.opengles.GL10;
 
 public class JCGLContextHelper {
 
     private static final String TAG = "jcglenv:ctxhelper";
+
+    private static EGL10 sEGL10;
+    private static EGL11 sEGL11;
+    private static EGL14 sEGL14;
+    private static EGL15 sEGL15;
+
+    private static GLES20 sGLES20;
+    private static GLES30 sGLES30;
+    private static GLES31 sGLES31;
+    private static GLES32 sGLES32;
 
     private static HashMap<Integer, String> eglIntAttribToStringMap = new HashMap<> ();
     private static HashMap<Integer, String> eglIntErrorToStringMap = new HashMap<> ();
@@ -23,6 +42,7 @@ public class JCGLContextHelper {
     private static HashMap<Integer, String> glesDataTypeToStringMap = new HashMap<> ();
     private static HashMap<Integer, String> glesDrawModeToStringMap = new HashMap<> ();
     private static HashMap<Integer, String> glesShaderTypeToStringMap = new HashMap<> ();
+    private static HashMap<Integer, String> glesIntAttribTypeToStringMap = new HashMap<> ();
 
     // TODO: texture targets
     // TODO: texture internal formats
@@ -99,6 +119,16 @@ public class JCGLContextHelper {
         if ( glesBufferTargetToStringMap.isEmpty () ) {
             glesBufferTargetToStringMap.put ( GLES32.GL_ARRAY_BUFFER, "GL_ARRAY_BUFFER" );
             glesBufferTargetToStringMap.put ( GLES32.GL_ELEMENT_ARRAY_BUFFER, "GL_ELEMENT_ARRAY_BUFFER" );
+            glesBufferTargetToStringMap.put ( GLES32.GL_UNIFORM_BUFFER, "GL_UNIFORM_BUFFER" );
+            glesBufferTargetToStringMap.put ( GLES32.GL_TRANSFORM_FEEDBACK_BUFFER, "GL_TRANSFORM_FEEDBACK_BUFFER" );
+            glesBufferTargetToStringMap.put ( GLES32.GL_SHADER_STORAGE_BUFFER, "GL_SHADER_STORAGE_BUFFER" );
+            glesBufferTargetToStringMap.put ( GLES32.GL_PIXEL_UNPACK_BUFFER, "GL_PIXEL_UNPACK_BUFFER" );
+            glesBufferTargetToStringMap.put ( GLES32.GL_PIXEL_PACK_BUFFER, "GL_PIXEL_PACK_BUFFER" );
+            glesBufferTargetToStringMap.put ( GLES32.GL_DISPATCH_INDIRECT_BUFFER, "GL_DISPATCH_INDIRECT_BUFFER" );
+            glesBufferTargetToStringMap.put ( GLES32.GL_DRAW_INDIRECT_BUFFER, "GL_DRAW_INDIRECT_BUFFER" );
+            glesBufferTargetToStringMap.put ( GLES32.GL_COPY_WRITE_BUFFER, "GL_COPY_WRITE_BUFFER" );
+            glesBufferTargetToStringMap.put ( GLES32.GL_COPY_READ_BUFFER, "GL_COPY_READ_BUFFER" );
+            glesBufferTargetToStringMap.put ( GLES32.GL_ATOMIC_COUNTER_BUFFER, "GL_ATOMIC_COUNTER_BUFFER" );
         }
     }
 
@@ -107,6 +137,12 @@ public class JCGLContextHelper {
             glesBufferUsageToStringMap.put ( GLES32.GL_STATIC_DRAW, "GL_STATIC_DRAW" );
             glesBufferUsageToStringMap.put ( GLES32.GL_STREAM_DRAW, "GL_STREAM_DRAW" );
             glesBufferUsageToStringMap.put ( GLES32.GL_DYNAMIC_DRAW, "GL_DYNAMIC_DRAW" );
+            glesBufferUsageToStringMap.put ( GLES32.GL_STATIC_READ, "GL_STATIC_READ" );
+            glesBufferUsageToStringMap.put ( GLES32.GL_DYNAMIC_READ, "GL_DYNAMIC_DRAW" );
+            glesBufferUsageToStringMap.put ( GLES32.GL_STREAM_READ, "GL_DYNAMIC_DRAW" );
+            glesBufferUsageToStringMap.put ( GLES32.GL_STATIC_COPY, "GL_STATIC_COPY" );
+            glesBufferUsageToStringMap.put ( GLES32.GL_DYNAMIC_COPY, "GL_DYNAMIC_COPY" );
+            glesBufferUsageToStringMap.put ( GLES32.GL_STREAM_COPY, "GL_STREAM_COPY" );
         }
     }
 
@@ -139,6 +175,36 @@ public class JCGLContextHelper {
         if ( glesShaderTypeToStringMap.isEmpty () ) {
             glesShaderTypeToStringMap.put ( GLES32.GL_VERTEX_SHADER, "GL_VERTEX_SHADER" );
             glesShaderTypeToStringMap.put ( GLES32.GL_FRAGMENT_SHADER, "GL_FRAGMENT_SHADER" );
+            glesShaderTypeToStringMap.put ( GLES32.GL_GEOMETRY_SHADER, "GL_GEOMETRY_SHADER" );
+            glesShaderTypeToStringMap.put ( GLES32.GL_TESS_CONTROL_SHADER, "GL_TESS_CONTROL_SHADER" );
+            glesShaderTypeToStringMap.put ( GLES32.GL_TESS_EVALUATION_SHADER, "GL_TESS_EVALUATION_SHADER" );
+            glesShaderTypeToStringMap.put ( GLES32.GL_COMPUTE_SHADER, "GL_COMPUTE_SHADER" );
+        }
+    }
+
+    private static void initGLESAttribTypeMap () {
+        if ( glesIntAttribTypeToStringMap.isEmpty () ) {
+            glesIntAttribTypeToStringMap.put ( GLES32.GL_FLOAT, "GL_FLOAT" );
+            glesIntAttribTypeToStringMap.put ( GLES32.GL_FLOAT_VEC2, "GL_FLOAT_VEC2" );
+            glesIntAttribTypeToStringMap.put ( GLES32.GL_FLOAT_VEC3, "GL_FLOAT_VEC3" );
+            glesIntAttribTypeToStringMap.put ( GLES32.GL_FLOAT_VEC4, "GL_FLOAT_VEC4" );
+            glesIntAttribTypeToStringMap.put ( GLES32.GL_FLOAT_MAT2, "GL_FLOAT_MAT2" );
+            glesIntAttribTypeToStringMap.put ( GLES32.GL_FLOAT_MAT3, "GL_FLOAT_MAT3" );
+            glesIntAttribTypeToStringMap.put ( GLES32.GL_FLOAT_MAT4, "GL_FLOAT_MAT4" );
+            glesIntAttribTypeToStringMap.put ( GLES32.GL_FLOAT_MAT2x3, "GL_FLOAT_MAT2x3" );
+            glesIntAttribTypeToStringMap.put ( GLES32.GL_FLOAT_MAT2x4, "GL_FLOAT_MAT2x4" );
+            glesIntAttribTypeToStringMap.put ( GLES32.GL_FLOAT_MAT3x2, "GL_FLOAT_MAT3x2" );
+            glesIntAttribTypeToStringMap.put ( GLES32.GL_FLOAT_MAT3x4, "GL_FLOAT_MAT3x4" );
+            glesIntAttribTypeToStringMap.put ( GLES32.GL_FLOAT_MAT4x2, "GL_FLOAT_MAT4x2" );
+            glesIntAttribTypeToStringMap.put ( GLES32.GL_FLOAT_MAT4x3, "GL_FLOAT_MAT4x3" );
+            glesIntAttribTypeToStringMap.put ( GLES32.GL_INT, "GL_INT" );
+            glesIntAttribTypeToStringMap.put ( GLES32.GL_INT_VEC2, "GL_INT_VEC2" );
+            glesIntAttribTypeToStringMap.put ( GLES32.GL_INT_VEC3, "GL_INT_VEC3" );
+            glesIntAttribTypeToStringMap.put ( GLES32.GL_INT_VEC4, "GL_INT_VEC4" );
+            glesIntAttribTypeToStringMap.put ( GLES32.GL_UNSIGNED_INT, "GL_UNSIGNED_INT" );
+            glesIntAttribTypeToStringMap.put ( GLES32.GL_UNSIGNED_INT_VEC2, "GL_UNSIGNED_INT_VEC2" );
+            glesIntAttribTypeToStringMap.put ( GLES32.GL_UNSIGNED_INT_VEC3, "GL_UNSIGNED_INT_VEC3" );
+            glesIntAttribTypeToStringMap.put ( GLES32.GL_UNSIGNED_INT_VEC4, "GL_UNSIGNED_INT_VEC4" );
         }
     }
 
@@ -266,7 +332,15 @@ public class JCGLContextHelper {
         return glesShaderTypeToStringMap.getOrDefault ( type, "UNKNOWN_SHADER_TYPE" );
     }
 
-    public static void logEGLErrors ( EGL10 egl, String op ) {
+    public static String getOpenGLAttribTypeString ( int type ) {
+        if ( glesIntAttribTypeToStringMap.isEmpty () ) {
+            initGLESAttribTypeMap ();
+        }
+
+        return glesIntAttribTypeToStringMap.getOrDefault ( type, "UNKNOWN_ATTRIB_TYPE" );
+    }
+
+    public static void logEGLErrors ( @NonNull EGL10 egl, String op ) {
         int err = egl.eglGetError ();
         while ( EGL10.EGL_SUCCESS != err ) {
             String errString = getEGLErrorString ( err );
@@ -280,9 +354,17 @@ public class JCGLContextHelper {
         Log.d ( TAG, "OpenGL ES Version: " + versionStr );
     }
 
+    public static void logGLSLVersion ( GL10 gl ) {
+        String glslVersionStr = getGLSLVersionString ( gl );
+        Log.d ( TAG, "OpenGL Shading Language Version: " + glslVersionStr );
+    }
+
     public static void logGLExtensions ( GL10 gl ) {
-        String extensions = getGLExtensionsString ( gl );
-        Log.d ( TAG, "OpenGL ES Extensions: \n" + extensions );
+        String[] extensions = getGLExtensions ( gl );
+        Log.d ( TAG, "Found " + extensions.length + " OpenGL ES Extensions" );
+        for ( String extStr : extensions ) {
+            Log.d ( TAG, extStr );
+        }
     }
 
     public static void logGLVendor ( GL10 gl ) {
@@ -295,24 +377,88 @@ public class JCGLContextHelper {
         Log.d ( TAG, "OpenGL ES Renderer: " + rendererStr );
     }
 
-    public static String getGLVersionString ( GL10 gl ) {
+    public static String getGLVersionString ( @NonNull GL10 gl ) {
         // Create a minimum supported OpenGL ES context, then check:
         String version = gl.glGetString ( GL10.GL_VERSION );
         return version;
     }
 
-    public static String getGLExtensionsString ( GL10 gl ) {
+    public static String getGLExtensionsString ( @NonNull GL10 gl ) {
         String extensions = gl.glGetString ( GL10.GL_EXTENSIONS );
         return extensions;
     }
 
-    public static String getGLVendorString ( GL10 gl ) {
+    public static String[] getGLExtensions ( GL10 gl ) {
+        String extStr = gl.glGetString ( GL10.GL_EXTENSIONS );
+        String[] extensions = extStr.split ( " " );
+        return extensions;
+    }
+
+    public static String getGLVendorString ( @NonNull GL10 gl ) {
         String vendor = gl.glGetString ( GL10.GL_VENDOR );
         return vendor;
     }
 
-    public static String getGLRendererString ( GL10 gl ) {
+    public static String getGLRendererString ( @NonNull GL10 gl ) {
         String renderer = gl.glGetString ( GL10.GL_RENDERER );
         return renderer;
+    }
+
+    @Nullable
+    public static String getGLSLVersionString ( GL10 gl ) {
+        if ( sGLES20 != null ) {
+            return gl.glGetString ( GLES20.GL_SHADING_LANGUAGE_VERSION );
+        }
+        return null;
+    }
+
+    public static void setGLES32 ( GLES32 gles32 ) {
+        sGLES32 = gles32;
+        if ( gles32 != null ) {
+            sGLES31 = gles32;
+            sGLES30 = gles32;
+            sGLES20 = gles32;
+        }
+    }
+
+    public static GLES32 getGLES32 () {
+        return sGLES32;
+    }
+
+    public static void setEGL15 ( EGL15 egl15 ) {
+        sEGL15 = egl15;
+    }
+
+    public static void setEGL14 ( EGL14 egl14 ) {
+        sEGL14 = egl14;
+    }
+
+    public static void setEGL11 ( EGL11 egl11 ) {
+        sEGL11 = egl11;
+        if ( egl11 != null ) {
+            sEGL10 = egl11;
+        }
+    }
+
+    public static void setEGL10 ( EGL10 egl10 ) {
+        if ( null == sEGL11 ) {
+            sEGL10 = egl10;
+        }
+    }
+
+    public static EGL15 getEGL15 () {
+        return sEGL15;
+    }
+
+    public static EGL14 getEGL14 () {
+        return sEGL14;
+    }
+
+    public static EGL11 getEGL11 () {
+        return sEGL11;
+    }
+
+    public static EGL10 getEGL10 () {
+        return sEGL10;
     }
 }

@@ -175,6 +175,10 @@ public class Square {
     public void rotate ( float angle, float axisX, float axisY, float axisZ ) {
         Matrix.rotateM ( mModelMatrix, 0, angle, axisX, axisY, axisZ );
     }
+
+    public void setRotate ( float angle, float axisX, float axisY, float axisZ ) {
+        Matrix.setRotateM ( mModelMatrix, 0, angle, axisX, axisY, axisZ );
+    }
 }
 /*
 

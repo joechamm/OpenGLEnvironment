@@ -18,6 +18,7 @@ public class JCGLRenderer implements GLSurfaceView.Renderer {
 
     private Triangle mTriangle;
     private Square mSquare;
+    private Cube mCube;
 
     // vPMatrix is an abbreviation for "Model View Projection Matrix"
     //   private final float[] vPMatrix = new float[ 16 ];
@@ -58,6 +59,10 @@ public class JCGLRenderer implements GLSurfaceView.Renderer {
 
         // initialize square
         mSquare = new Square ( mContext );
+
+        // initialize our cube
+        mCube = new Cube ( mContext );
+        mCube.setTranslate ( 0.0f, 0.2f, - 1.5f );
     }
 
     @Override
@@ -105,7 +110,8 @@ public class JCGLRenderer implements GLSurfaceView.Renderer {
 
         mPerFrameUniforms.setViewLookAt ( eyeX, eyeY, eyeZ, targetX, targetY, targetZ, upX, upY, upZ );
 
-        mSquare.rotate ( mAngle, 0.0f, 0.0f, - 1.0f );
+        //     mSquare.rotate ( mAngle, 0.0f, 0.0f, - 1.0f );
+        mSquare.setRotate ( mAngle, 0.0f, 0.0f, - 1.0f );
 
         mSquare.draw ( mPerFrameUniforms );
 
@@ -133,8 +139,18 @@ public class JCGLRenderer implements GLSurfaceView.Renderer {
         // the vPMMatrix hasn't changed, so now we just multiply vPMatrix * rotationMatrix and store the result in scratch
         //    Matrix.multiplyMM ( scratch, 0, vPMatrix, 0, rotationMatrix, 0 );
 
-        mTriangle.rotate ( angle, 0.0f, 0.0f, - 1.0f );
+        //      mTriangle.rotate ( angle, 0.0f, 0.0f, - 1.0f );
+        mTriangle.setRotate ( angle, 0.0f, 0.0f, - 1.0f );
         mTriangle.draw ( mPerFrameUniforms );
+
+        float px = (float) ( 0.5f * Math.cos ( (double) angle ) );
+        float py = 0.0f;
+        float pz = (float) ( 0.5f * Math.cos ( (double) 2.0 * angle ) );
+
+        //mCube.rotate ( 0.02f, 0.0f, 1.0f, 0.0f );
+
+        mCube.setTranslate ( px, py, pz );
+        mCube.draw ( mPerFrameUniforms );
 
         // Draw the triangle now
         //    mTriangle.draw ( scratch );

@@ -17,5 +17,7 @@ public class Constants {
     public static final int NORMAL_ELEMENT_COUNT = 3;
     public static final int UV_ELEMENT_COUNT = 2;
 
+    public static final int BIND_TEX_DENSITY = 0;
     public static final int BIND_IDX_UNIFORMS = 7;
+
 }

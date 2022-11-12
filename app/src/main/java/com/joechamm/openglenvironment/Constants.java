@@ -20,4 +20,7 @@ public class Constants {
     public static final int BIND_TEX_DENSITY = 0;
     public static final int BIND_IDX_UNIFORMS = 7;
 
+    // Velocity Display Scale
+    public static final float VELOCITY_DISP_SCALE = 5.0f;
+
 }

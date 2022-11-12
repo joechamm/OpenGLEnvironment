@@ -34,6 +34,6 @@ public class DensityShader extends ShaderProgram {
     public int getColorLoc () {
         return uLoc_color;
     }
-    
+
 
 }

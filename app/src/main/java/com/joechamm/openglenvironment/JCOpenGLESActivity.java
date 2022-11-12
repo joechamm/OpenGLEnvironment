@@ -24,7 +24,8 @@ public class JCOpenGLESActivity extends Activity {
         Log.d ( TAG, "JCOpenGLESActivity onCreate called" );
 
         // Create a GLSurfaceView instance and set it as the ContentView for this activity
-        mGLSurfaceView = new JCGLSurfaceView ( this );
+        //    mGLSurfaceView = new JCGLSurfaceView ( this );
+        mGLSurfaceView = new EigenFluidsView ( this );
         setContentView ( mGLSurfaceView );
     }
 

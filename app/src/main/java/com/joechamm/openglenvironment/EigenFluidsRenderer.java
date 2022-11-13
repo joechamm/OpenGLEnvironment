@@ -95,6 +95,7 @@ public class EigenFluidsRenderer implements GLSurfaceView.Renderer {
 
         mPerFrameUniforms.setModelIdentity ();
         mPerFrameUniforms.setProjOrtho ( 0.0f, 1.0f, 0.0f, 1.0f, - 1.0f, 1.0f );
+//        mPerFrameUniforms.setProjOrtho ( -1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f );
 
         GLES32.glViewport ( 0, 0, WIN_WIDTH, WIN_HEIGHT );
     }
@@ -104,6 +105,10 @@ public class EigenFluidsRenderer implements GLSurfaceView.Renderer {
         LEFuncs.step ();
 
         GLES32.glClear ( GLES32.GL_COLOR_BUFFER_BIT );
+
+        if ( mPerFrameUniforms.needsUpdate () ) {
+            mPerFrameUniforms.updateBuffer ();
+        }
 
         // if RENDER_DENSITY is on, update the density texture and render
         if ( RENDER_DENSITY ) {

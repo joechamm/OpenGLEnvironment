@@ -21,9 +21,9 @@ public class EigenFluidsRenderer implements GLSurfaceView.Renderer {
 
     private PerFrameUniforms mPerFrameUniforms;
 
-    private static final int VEL_RESOLUTION = 36;
-    private static final int DEN_RESOLUTION = 36;
-    private static final int DIMENSION = 36;
+    private static final int VEL_RESOLUTION = 100;
+    private static final int DEN_RESOLUTION = 100;
+    private static final int DIMENSION = 256;
 
     public static final boolean RENDER_VELOCITY = true;
     public static final boolean RENDER_DENSITY = true;
